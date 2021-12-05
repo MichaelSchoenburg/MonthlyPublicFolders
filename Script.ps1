@@ -27,7 +27,7 @@
     ** https://docs.microsoft.com/en-us/powershell/scripting/dev-cross-plat/performance/script-authoring-considerations?view=powershell-7.1
 #>
 
-[CmdletBinding()]
+[CmdletBinding(DefaultParameterSetName = "Org")]
 param (
     # General
     [Parameter(Mandatory)]
@@ -64,8 +64,15 @@ param (
     [string]
     $PathToCert = 'Cert:\LocalMachine\My',
 
+    [Parameter(Mandatory = $true,
+        ParameterSetName = "Deleg")]
     [string]
-    $DelegatedOrg
+    $DelegatedOrg,
+
+    [Parameter(Mandatory = $true,
+        ParameterSetName = "Org")]
+    [string]
+    $Organization
 )
 
 #region FUNCTIONS
@@ -187,7 +194,7 @@ $Thumbprint = ((Get-ChildItem $PathToCert).Where({$_.Subject -eq 'CN=onboardingS
 if ($DelegatedOrg) {
     Connect-ExchangeOnline -DelegatedOrganization $DelegatedOrg -AppId $AppID -CertificateThumbprint $Thumbprint -ShowBanner:$false
 } else {
-    Connect-ExchangeOnline -AppId $AppID -CertificateThumbprint $Thumbprint -ShowBanner:$false
+    Connect-ExchangeOnline -AppId $AppID -CertificateThumbprint $Thumbprint -Organization $Organization -ShowBanner:$false
 }
 
 # Clean up any old rules
